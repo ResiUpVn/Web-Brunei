@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { MessageCircle, X, Send, Loader2 } from 'lucide-react';
+import { useState, useRef, useEffect } from 'react';
+import { MessageCircle, X, Send, Loader2, Volume2, Copy, ThumbsUp, ThumbsDown } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
 interface Message {
@@ -7,6 +7,12 @@ interface Message {
   text: string;
   sender: 'user' | 'bot';
   timestamp: Date;
+  isPreset?: boolean;
+}
+
+interface ApiStatus {
+  isAvailable: boolean;
+  lastChecked: Date;
 }
 
 const GEMINI_API_KEY = 'AIzaSyDxmNwwNANtRW9s3kd6e0PJin0F_aXDULM';
@@ -16,20 +22,30 @@ export default function Chatbot() {
   const [messages, setMessages] = useState<Message[]>([
     {
       id: 1,
-      text: 'Xin chào! Tôi là Brunei Assistant được hỗ trợ bởi Google Gemini AI. Tôi có thể giúp bạn khám phá Brunei, gợi ý địa điểm, lịch trình và trả lời câu hỏi về văn hóa, ẩm thực. Bạn cần hỗ trợ gì?',
+      text: 'Xin chào! 👋 Tôi là Brunei Assistant - trợ lý du lịch thông minh của bạn. Tôi được hỗ trợ bởi Google Gemini AI và có kho kiến thức lưu trữ sẵn.\n\n✨ Tôi có thể giúp bạn:\n📍 Gợi ý địa điểm du lịch\n📅 Lập kế hoạch lịch trình\n🍽️ Tìm hiểu ẩm thực Brunei\n💰 Ước tính chi phí du lịch\n🏛️ Khám phá văn hóa & phong tục\n\nHãy đặt câu hỏi hoặc chọn một gợi ý dưới đây!',
       sender: 'bot',
       timestamp: new Date(),
     },
   ]);
   const [inputValue, setInputValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [apiStatus, setApiStatus] = useState<ApiStatus>({
+    isAvailable: true,
+    lastChecked: new Date(),
+  });
+  const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const quickReplies = [
-    'Gợi ý lịch trình 2 ngày',
-    'Địa điểm nổi tiếng',
-    'Món ăn đặc sản',
-    'Chi phí du lịch',
+    { text: 'Lịch trình 2 ngày', icon: '📅' },
+    { text: 'Top địa điểm', icon: '📍' },
+    { text: 'Ẩm thực đặc sản', icon: '🍽️' },
+    { text: 'Chi phí du lịch', icon: '💰' },
   ];
+
+  // Auto scroll to bottom khi có tin nhắn mới
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages]);
 
   // Kịch bản sẵn cho các chủ đề phổ biến
   const presetScenarios: Record<string, string> = {
@@ -46,7 +62,7 @@ export default function Chatbot() {
     'khác': 'Tôi có thể giúp bạn về:\n\n📍 Gợi ý địa điểm du lịch\n📅 Lập lịch trình 1-3 ngày\n🍽️ Thông tin về ẩm thực Brunei\n🏛️ Văn hóa và phong tục địa phương\n💰 Chi phí ước tính\n✈️ Thông tin vé bay và khách sạn\n🛂 Quy định nhập cảnh\n🛍️ Mua sắm tại Brunei\n🏥 Thông tin y tế & an toàn\n\nBạn muốn tìm hiểu về điều gì?'
   };
 
-  const getBotResponseFromGemini = async (userMessage: string): Promise<string> => {
+  const getBotResponseFromGemini = async (userMessage: string): Promise<{ text: string; isPreset: boolean }> => {
     try {
       if (!GEMINI_API_KEY) {
         throw new Error('API Key không được cấu hình');
@@ -54,12 +70,15 @@ export default function Chatbot() {
 
       const systemPrompt = `Bạn là Brunei Assistant, trợ lý du lịch chuyên nghiệp về Brunei Darussalam. Hãy trả lời bằng tiếng Việt một cách thân thiện, nhiệt tình và chi tiết.
 
-Thông tin về Brunei:
+Thông tin cơ bản về Brunei:
 - Thủ đô: Bandar Seri Begawan
 - Quốc gia Hồi giáo với luật Sharia
+- Dân số: ~450,000 người
+- Tiền tệ: Brunei Dollar (BND)
 - Nổi tiếng: Kampong Ayer (làng nước lớn nhất thế giới), các nhà thờ Hồi giáo tráng lệ
 - Top địa điểm: Masjid Sultan Omar Ali Saifuddien, Kampong Ayer, Royal Regalia Museum, Ulu Temburong National Park, Jerudong Park
 - Món ăn: Ambuyat, Nasi Katok, Beef Rendang, Satay, Soto
+- Thời gian bay từ Việt Nam: ~2-3 giờ
 - Chi phí: 15-30 triệu VNĐ cho 3-4 ngày
 - Lưu ý: Cấm rượu công khai, ăn mặc lịch sự, tôn trọng văn hóa Hồi giáo
 
@@ -108,14 +127,18 @@ Hãy trả lời câu hỏi của người dùng một cách hữu ích, sử d�
       const botResponse = data.candidates?.[0]?.content?.parts?.[0]?.text;
       
       if (botResponse) {
-        return botResponse;
+        setApiStatus({ isAvailable: true, lastChecked: new Date() });
+        return { text: botResponse, isPreset: false };
       } else {
         throw new Error('Không nhận được phản hồi từ API');
       }
     } catch (error) {
       console.error('Gemini API Error:', error);
-      // Fallback to basic responses if API fails
-      return getFallbackResponse(userMessage);
+      setApiStatus({ isAvailable: false, lastChecked: new Date() });
+      
+      // Fallback to preset scenarios
+      const presetResponse = getFallbackResponse(userMessage);
+      return { text: presetResponse, isPreset: true };
     }
   };
 
@@ -162,20 +185,21 @@ Hãy trả lời câu hỏi của người dùng một cách hữu ích, sử d�
     setIsLoading(true);
 
     try {
-      const botResponseText = await getBotResponseFromGemini(inputValue);
+      const response = await getBotResponseFromGemini(inputValue);
       
       const botMessage: Message = {
         id: Date.now() + 1,
-        text: botResponseText,
+        text: response.text,
         sender: 'bot',
         timestamp: new Date(),
+        isPreset: response.isPreset,
       };
       
       setMessages(prev => [...prev, botMessage]);
     } catch (error) {
       const errorMessage: Message = {
         id: Date.now() + 1,
-        text: 'Xin lỗi, tôi gặp sự cố kỹ thuật. Vui lòng thử lại sau.',
+        text: '❌ Xin lỗi, tôi gặp sự cố kỹ thuật. Vui lòng thử lại sau.',
         sender: 'bot',
         timestamp: new Date(),
       };
@@ -185,8 +209,27 @@ Hãy trả lời câu hỏi của người dùng một cách hữu ích, sử d�
     }
   };
 
-  const handleQuickReply = (reply: string) => {
-    setInputValue(reply);
+  const handleQuickReply = (replyText: string) => {
+    setInputValue(replyText);
+  };
+
+  // Kiểm tra API status
+  const checkApiStatus = async (): Promise<boolean> => {
+    try {
+      const response = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${GEMINI_API_KEY}`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            contents: [{ parts: [{ text: 'ping' }] }],
+          }),
+        }
+      );
+      return response.ok;
+    } catch {
+      return false;
+    }
   };
 
   return (
@@ -216,26 +259,35 @@ Hãy trả lời câu hỏi của người dùng một cách hữu ích, sử d�
                 <span className="text-2xl">🤖</span>
               </div>
               <div className="flex-1">
-                <h3>Brunei Assistant</h3>
-                <p className="text-xs text-blue-100">Powered by Google Gemini AI</p>
+                <h3 className="font-bold">Brunei Assistant</h3>
+                <p className="text-xs text-blue-100">
+                  {apiStatus.isAvailable ? '🟢 Powered by Gemini AI' : '🔴 Using Offline Mode'}
+                </p>
               </div>
             </div>
 
             {/* Messages */}
             <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50">
-              {messages.map(message => (
+              {messages.map((message) => (
                 <div
                   key={message.id}
                   className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'}`}
                 >
                   <div
-                    className={`max-w-[80%] rounded-2xl px-4 py-2 ${
+                    className={`max-w-[80%] rounded-2xl px-4 py-3 ${
                       message.sender === 'user'
                         ? 'bg-blue-600 text-white rounded-br-sm'
                         : 'bg-white text-gray-800 rounded-bl-sm shadow-sm border border-gray-200'
                     }`}
                   >
                     <p className="text-sm whitespace-pre-line">{message.text}</p>
+                    {message.sender === 'bot' && (
+                      <div className="flex items-center gap-2 mt-2 pt-2 border-t border-gray-200">
+                        <span className="text-xs text-gray-500">
+                          {message.isPreset ? '📚 Từ kho sẵn' : '🤖 Từ AI'}
+                        </span>
+                      </div>
+                    )}
                   </div>
                 </div>
               ))}
@@ -246,6 +298,7 @@ Hãy trả lời câu hỏi của người dùng một cách hữu ích, sử d�
                   </div>
                 </div>
               )}
+              <div ref={messagesEndRef} />
             </div>
 
             {/* Quick Replies */}
@@ -253,13 +306,14 @@ Hãy trả lời câu hỏi của người dùng một cách hữu ích, sử d�
               <div className="px-4 py-2 bg-white border-t border-gray-200">
                 <p className="text-xs text-gray-500 mb-2">Gợi ý câu hỏi:</p>
                 <div className="flex flex-wrap gap-2">
-                  {quickReplies.map(reply => (
+                  {quickReplies.map((reply) => (
                     <button
-                      key={reply}
-                      onClick={() => handleQuickReply(reply)}
-                      className="text-xs px-3 py-1.5 bg-blue-50 text-blue-700 rounded-full hover:bg-blue-100 transition-colors"
+                      key={reply.text}
+                      onClick={() => handleQuickReply(reply.text)}
+                      className="text-xs px-3 py-1.5 bg-blue-50 text-blue-700 rounded-full hover:bg-blue-100 transition-colors flex items-center gap-1"
                     >
-                      {reply}
+                      <span>{reply.icon}</span>
+                      <span>{reply.text}</span>
                     </button>
                   ))}
                 </div>
