@@ -31,8 +31,27 @@ export default function Chatbot() {
     'Chi phí du lịch',
   ];
 
+  // Kịch bản sẵn cho các chủ đề phổ biến
+  const presetScenarios: Record<string, string> = {
+    'lịch trình': 'Đây là lịch trình gợi ý 2 ngày tại Brunei:\n\n📅 Ngày 1:\n- Sáng: Tham quan Masjid Omar Ali Saifuddien (nhà thờ tuyệt đẹp)\n- Trưa: Ăn trưa tại Gadong Night Market\n- Chiều: Khám phá Royal Regalia Museum (bảo tàng hoàng gia)\n- Tối: Đi dạo tại Kampong Ayer (làng nước cổ kính)\n\n📅 Ngày 2:\n- Sáng: Tham quan Ulu Temburong National Park\n- Chiều: Ghé Jerudong Park\n- Tối: Mua sắm tại Yayasan Complex\n\nTổng chi phí ước tính: 2-3 triệu VNĐ/người',
+    
+    'địa điểm': 'Top 5 địa điểm du lịch nổi tiếng nhất Brunei:\n\n1. 🕌 Masjid Sultan Omar Ali Saifuddien\n   - Nhà thờ Hồi giáo tuyệt đẹp với kiến trúc lộng lẫy\n   - Tọa lạc bên bờ sông Brunei\n   - Giờ mở: 8:30 - 16:30 (không phải thứ 6)\n   - Phí vào: Miễn phí\n\n2. 🏘️ Kampong Ayer\n   - Làng nước lớn nhất thế giới (khoảng 40,000 dân)\n   - Những ngôi nhà truyền thống nổi trên nước\n   - Cách đến: Chèo thuyền từ Bandar Seri Begawan (10-15 phút)\n\n3. 🏛️ Royal Regalia Museum\n   - Bảo tàng hoàng gia với những kỷ vật quý báu\n   - Trưng bày về lịch sử hoàng gia Brunei\n   - Phí vào: 5$\n\n4. 🌳 Ulu Temburong National Park\n   - Vườn quốc gia nguyên sinh\n   - Thiên đường cho những người yêu thiên nhiên\n   - Cách Bandar: 45 phút lái xe\n\n5. 🎢 Jerudong Park\n   - Công viên giải trí lớn nhất khu vực\n   - Miễn phí vào cửa, chỉ tính tiền trò chơi',
+    
+    'ẩm thực': 'Những món ăn đặc sản Brunei không nên bỏ qua:\n\n🍲 Ambuyat (Món Quốc Dân)\n   - Làm từ bột cây sú + nước hột vịt\n   - Ăn với nước sốt cá muối hoặc tôm\n   - Ăn ở nhà hàng truyền thống\n\n🍚 Nasi Katok (Cơm Nhanh)\n   - Cơm trắng + cá muối nướng + nước sốt cà chua\n   - Ăn uống bình dân, giá rẻ\n   - Nơi: Gadong Night Market\n\n🥘 Beef Rendang (Thịt Bò Kho Dừa)\n   - Thịt bò nấu với nước cốt dừa & gia vị\n   - Mùi vị đậm đà, thơm ngon\n   - Ăn kèm cơm trắng\n\n🍢 Satay (Thịt Nướng Xiên)\n   - Thịt (gà, bò) nướng xiên\n   - Ăn kèm nước sốt nạo dừa\n   - Phổ biến tại các quán nướng\n\n🥣 Soto (Canh Truyền Thống)\n   - Canh gia vị Brunei đặc trưng\n   - Ấm áp, tốt cho sức khỏe\n   - Ăn sáng hoặc xen như món phụ\n\nNơi ăn ngon: Gadong Night Market, Pasar Malam Tamu, các quán địa phương',
+    
+    'chi phí': 'Chi phí ước tính cho chuyến du lịch Brunei (3-4 ngày):\n\n✈️ Vé máy bay (Việt Nam - Brunei):\n   - Vé khứ hồi: 5-10 triệu VNĐ\n   - Tùy vào mùa và hãng hàng không\n\n🏨 Khách sạn (theo đêm):\n   - Budget: 30-50$/đêm (700k-1.2 triệu VNĐ)\n   - Mid-range: 50-100$/đêm (1.2-2.3 triệu VNĐ)\n   - Luxury: 100+$/đêm (2.3 triệu VNĐ trở lên)\n\n🍽️ Ăn uống (mỗi ngày):\n   - Bình dân: 10-15$/ngày (230k-350k VNĐ)\n   - Trung bình: 15-25$/ngày (350k-600k VNĐ)\n   - Cao cấp: 25+$/ngày (600k+ VNĐ)\n\n🚕 Di chuyển trong nước:\n   - Taxi: 2-5$ mỗi chuyến\n   - Tour: 50-100$ (1.2-2.3 triệu VNĐ)\n   - Tổng: 3-5 triệu VNĐ\n\n🎫 Vào cửa các địa điểm:\n   - Hầu hết miễn phí\n   - Một số bảo tàng: 3-5$ mỗi cái\n   - Tổng: 1-3 triệu VNĐ\n\n💰 TỔNG CỘNG: 15-30 triệu VNĐ/người (3-4 ngày)',
+    
+    'văn hóa': 'Thông tin về văn hóa & phong tục Brunei:\n\n🕌 Tôn giáo:\n   - Hơn 80% dân số theo Hồi giáo\n   - Đất nước Hồi giáo với luật Sharia\n   - Tôn trọng quy tắc tôn giáo là rất quan trọng\n\n👗 Trang phục:\n   - Nam: Quần dài, áo sơ mi dài (tôn trọng văn hóa)\n   - Nữ: Tránh mặc áo crop top, quần short ngắn\n   - Khi vào nhà thờ: Phụ nữ mặc áo dài, đội khăn\n\n🍷 Đồ uống:\n   - CẤM uống rượu công khai\n   - Không được mang rượu vào nước này\n   - Phạt tiền hoặc bỏ tù nếu vi phạm\n\n🤝 Lịch sự:\n   - Chào hỏi: Hai tay như cầu nguyện giữa ngực\n   - Tôn trọng các già có địa vị\n   - Không chỉ tay trực tiếp (dùng cả bàn tay)\n   - Cởi giày khi vào nhà hay điện thờ\n\n📸 Nhiếp ảnh:\n   - Xin phép trước khi chụp mọi người\n   - Tránh chụp các nơi quân sự\n   - Được chụp các địa điểm du lịch',
+    
+    'khác': 'Tôi có thể giúp bạn về:\n\n📍 Gợi ý địa điểm du lịch\n📅 Lập lịch trình 1-3 ngày\n🍽️ Thông tin về ẩm thực Brunei\n🏛️ Văn hóa và phong tục địa phương\n💰 Chi phí ước tính\n✈️ Thông tin vé bay và khách sạn\n🛂 Quy định nhập cảnh\n🛍️ Mua sắm tại Brunei\n🏥 Thông tin y tế & an toàn\n\nBạn muốn tìm hiểu về điều gì?'
+  };
+
   const getBotResponseFromGemini = async (userMessage: string): Promise<string> => {
     try {
+      if (!GEMINI_API_KEY) {
+        throw new Error('API Key không được cấu hình');
+      }
+
       const systemPrompt = `Bạn là Brunei Assistant, trợ lý du lịch chuyên nghiệp về Brunei Darussalam. Hãy trả lời bằng tiếng Việt một cách thân thiện, nhiệt tình và chi tiết.
 
 Thông tin về Brunei:
@@ -69,12 +88,20 @@ Hãy trả lời câu hỏi của người dùng một cách hữu ích, sử d�
               topP: 0.95,
               maxOutputTokens: 1024,
             },
+            safetySettings: [
+              {
+                category: 'HARM_CATEGORY_UNSPECIFIED',
+                threshold: 'BLOCK_NONE',
+              },
+            ],
           }),
         }
       );
 
       if (!response.ok) {
-        throw new Error('API request failed');
+        const errorData = await response.json();
+        console.error('API Error Details:', errorData);
+        throw new Error(`API request failed: ${response.statusText}`);
       }
 
       const data = await response.json();
@@ -83,7 +110,7 @@ Hãy trả lời câu hỏi của người dùng một cách hữu ích, sử d�
       if (botResponse) {
         return botResponse;
       } else {
-        throw new Error('No response from API');
+        throw new Error('Không nhận được phản hồi từ API');
       }
     } catch (error) {
       console.error('Gemini API Error:', error);
@@ -95,15 +122,29 @@ Hãy trả lời câu hỏi của người dùng một cách hữu ích, sử d�
   const getFallbackResponse = (userMessage: string): string => {
     const lower = userMessage.toLowerCase();
 
+    // Kiểm tra các từ khóa và trả về kịch bản sẵn
     if (lower.includes('lịch trình') || lower.includes('lich trinh')) {
-      return 'Đây là lịch trình gợi ý 2 ngày tại Brunei:\n\n📅 Ngày 1:\n- Sáng: Tham quan Masjid Omar Ali Saifuddien\n- Trưa: Ăn trưa tại Gadong Night Market\n- Chiều: Khám phá Royal Regalia Museum\n- Tối: Đi dạo tại Kampong Ayer\n\n📅 Ngày 2:\n- Sáng: Tham quan Ulu Temburong National Park\n- Chiều: Ghé Jerudong Park\n- Tối: Mua sắm tại Yayasan Complex';
+      return presetScenarios['lịch trình'];
     }
 
-    if (lower.includes('địa điểm') || lower.includes('dia diem') || lower.includes('nổi tiếng')) {
-      return 'Top 5 địa điểm du lịch nổi tiếng nhất Brunei:\n\n1. 🕌 Masjid Sultan Omar Ali Saifuddien - Nhà thờ Hồi giáo tuyệt đẹp\n2. 🏘️ Kampong Ayer - Làng nước lớn nhất thế giới\n3. 🏛️ Royal Regalia Museum - Bảo tàng hoàng gia\n4. 🌳 Ulu Temburong National Park - Vườn quốc gia nguyên sinh\n5. 🎢 Jerudong Park - Công viên giải trí lớn nhất';
+    if (lower.includes('địa điểm') || lower.includes('dia diem') || lower.includes('nổi tiếng') || lower.includes('noi tieng')) {
+      return presetScenarios['địa điểm'];
     }
 
-    return 'Tôi có thể giúp bạn về:\n\n📍 Gợi ý địa điểm du lịch\n📅 Lập lịch trình 1-3 ngày\n🍽️ Thông tin về ẩm thực\n🏛️ Văn hóa và phong tục\n💰 Chi phí ước tính\n\nBạn muốn tìm hiểu về điều gì?';
+    if (lower.includes('ẩm thực') || lower.includes('mon an') || lower.includes('an gi') || lower.includes('đồ ăn') || lower.includes('sushi') || lower.includes('cơm')) {
+      return presetScenarios['ẩm thực'];
+    }
+
+    if (lower.includes('chi phí') || lower.includes('giá') || lower.includes('bao nhiêu') || lower.includes('tien') || lower.includes('cost')) {
+      return presetScenarios['chi phí'];
+    }
+
+    if (lower.includes('văn hóa') || lower.includes('van hoa') || lower.includes('phong tục') || lower.includes('tôn giáo') || lower.includes('trang phục') || lower.includes('lịch sự')) {
+      return presetScenarios['văn hóa'];
+    }
+
+    // Trả về kịch bản mặc định nếu không khớp
+    return presetScenarios['khác'];
   };
 
   const handleSend = async () => {
