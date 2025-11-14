@@ -1,1 +1,9 @@
 node_modules
+
+# Build output
+/build
+
+# Optional
+.DS_Store
+.env
+.env.local
